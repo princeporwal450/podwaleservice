@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      (function() {
+        // 1. Intercept extension errors immediately
+        var suppress = function(e) {
+          var msg = (e && (e.message || (e.error && e.error.message))) || '';
+          var file = (e && (e.filename || (e.error && e.error.stack))) || '';
+          if (
+            file.indexOf('chrome-extension://') !== -1 ||
+            msg.indexOf('Cannot set property fetch') !== -1 ||
+            msg.indexOf('only a getter') !== -1
+          ) {
+            if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+            if (e.preventDefault) e.preventDefault();
+            return true;
+          }
+        };
+
+        window.addEventListener('error', suppress, true);
+        window.addEventListener('unhandledrejection', function(e) {
+          if (suppress(e.reason || e)) {
+            e.preventDefault();
+          }
+        }, true);
+
+        // 2. Add setter for 'fetch' on Window.prototype and window so Urban VPN / extensions can assign to it
+        try {
+          var currentFetch = window.fetch;
+          var fetchDescriptor = {
+            get: function() {
+              return currentFetch;
+            },
+            set: function(newFetch) {
+              currentFetch = newFetch;
+            },
+            configurable: true,
+            enumerable: true
+          };
+
+          if (typeof Window !== 'undefined' && Window.prototype) {
+            try {
+              Object.defineProperty(Window.prototype, 'fetch', fetchDescriptor);
+            } catch (_) {}
+          }
+
+          try {
+            Object.defineProperty(window, 'fetch', fetchDescriptor);
+          } catch (_) {}
+        } catch (_) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TapReview India | Smart NFC & QR Google Review Cards & Standees</title>
+    <meta name="description" content="India's leading store for smart NFC Google review cards, acrylic review standees, and custom QR contactless cards. Boost your 5-star customer reviews in one tap!" />
+    <meta property="og:title" content="TapReview India | Smart NFC & QR Google Review Cards & Standees" />
+    <meta property="og:description" content="India's leading store for smart NFC Google review cards, acrylic review standees, and custom QR contactless cards. Boost your 5-star customer reviews in one tap!" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
